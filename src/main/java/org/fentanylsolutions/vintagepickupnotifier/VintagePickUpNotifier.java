@@ -10,7 +10,17 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
-@Mod(modid = VintagePickUpNotifier.MODID, version = Tags.VERSION, name = "MyMod", acceptedMinecraftVersions = "[1.7.10]")
+@Mod(
+    modid = VintagePickUpNotifier.MODID,
+    version = Tags.VERSION,
+    name = "MyMod",
+    acceptedMinecraftVersions = "[1.7.10]",
+    acceptableRemoteVersions = "*",
+    customProperties = { @Mod.CustomProperty(k = "license", v = "LGPLv3+SNEED"),
+        @Mod.CustomProperty(
+            k = "issueTrackerUrl",
+            v = "https://github.com/JackOfNoneTrades/VintagePickUpNotifier/issues"),
+        @Mod.CustomProperty(k = "iconFile", v = "assets/vintagepickupnotifier/logo.png"), })
 public class VintagePickUpNotifier {
 
     public static final String MODID = "mymodid";
