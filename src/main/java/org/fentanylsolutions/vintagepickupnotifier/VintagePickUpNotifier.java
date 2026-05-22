@@ -13,7 +13,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
 @Mod(
     modid = VintagePickUpNotifier.MODID,
     version = Tags.VERSION,
-    name = "MyMod",
+    name = "Vintage Pick Up Notifier",
     acceptedMinecraftVersions = "[1.7.10]",
     acceptableRemoteVersions = "*",
     customProperties = { @Mod.CustomProperty(k = "license", v = "LGPLv3+SNEED"),
@@ -23,7 +23,7 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
         @Mod.CustomProperty(k = "iconFile", v = "assets/vintagepickupnotifier/logo.png"), })
 public class VintagePickUpNotifier {
 
-    public static final String MODID = "mymodid";
+    public static final String MODID = "vintagepickupnotifier";
     public static final Logger LOG = LogManager.getLogger(MODID);
 
     @SidedProxy(
