@@ -1,0 +1,21 @@
+{
+	"modListVersion": 2,
+	"modList": [{
+		"modid": "${modId}",
+		"name": "${modName}",
+		"description": "1.7.10 Pick Up Notifier backport.",
+		"version": "${modVersion}",
+		"mcversion": "${minecraftVersion}",
+		"url": "https://github.com/JackOfNoneTrades/VintagePickUpNotifier",
+		"updateUrl": "",
+		"authorList": ["Fuzss", "jack"],
+		"credits": "Original Pick Up Notifier mod, GT:NH example mod",
+		"logoFile": "assets/${modId}/logo.png",
+		"screenshots": [],
+		"parent": "",
+		"requiredMods": [],
+		"dependencies": [],
+		"dependants": [],
+		"useDependencyInformation": false
+	}]
+}
