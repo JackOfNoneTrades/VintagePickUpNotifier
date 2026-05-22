@@ -26,7 +26,9 @@ public class VintagePickUpNotifier {
     public static final String MODID = "mymodid";
     public static final Logger LOG = LogManager.getLogger(MODID);
 
-    @SidedProxy(clientSide = "com.myname.mymodid.ClientProxy", serverSide = "com.myname.mymodid.CommonProxy")
+    @SidedProxy(
+        clientSide = "org.fentanylsolutions.vintagepickupnotifier.ClientProxy",
+        serverSide = "org.fentanylsolutions.vintagepickupnotifier.CommonProxy")
     public static CommonProxy proxy;
 
     @Mod.EventHandler
