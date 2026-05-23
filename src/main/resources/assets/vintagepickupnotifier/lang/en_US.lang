@@ -1,5 +1,7 @@
 vintagepickupnotifier.configgui.title=Vintage Pick Up Notifier Config
+vintagepickupnotifier.config.category.debug=Debug
 vintagepickupnotifier.config.category.general=General
 vintagepickupnotifier.config.category.behavior=Behavior
 vintagepickupnotifier.config.category.display=Display
 vintagepickupnotifier.config.category.server=Server
+vintagepickupnotifier.config.debug.debugMode=Debug Mode

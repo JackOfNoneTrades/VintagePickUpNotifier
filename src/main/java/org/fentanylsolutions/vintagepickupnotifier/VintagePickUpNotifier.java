@@ -26,6 +26,7 @@ public class VintagePickUpNotifier {
 
     public static final String MODID = "vintagepickupnotifier";
     public static final Logger LOG = LogManager.getLogger(MODID);
+    private static boolean DEBUG_MODE;
 
     @SidedProxy(
         clientSide = "org.fentanylsolutions.vintagepickupnotifier.ClientProxy",
@@ -36,7 +37,13 @@ public class VintagePickUpNotifier {
     // preInit "Run before anything else. Read your config, create blocks, items, etc, and register them with the
     // GameRegistry." (Remove if not needed)
     public void preInit(FMLPreInitializationEvent event) {
+        String debugVar = System.getenv("MCMODDING_DEBUG_MODE");
+        DEBUG_MODE = debugVar != null;
+        VintagePickUpNotifier.LOG.info("MCMODDING_DEBUG_MODE env var: {}", DEBUG_MODE);
+        VintagePickUpNotifier.LOG.info("Using config file {}", event.getSuggestedConfigurationFile());
         proxy.preInit(event);
+        VintagePickUpNotifier.LOG.info("debugMode config option: {}", Config.debugMode);
+        VintagePickUpNotifier.LOG.info("isDebugMode: {}", isDebugMode());
     }
 
     @Mod.EventHandler
@@ -55,5 +62,15 @@ public class VintagePickUpNotifier {
     // register server commands in this event handler (Remove if not needed)
     public void serverStarting(FMLServerStartingEvent event) {
         proxy.serverStarting(event);
+    }
+
+    public static boolean isDebugMode() {
+        return DEBUG_MODE || Config.debugMode;
+    }
+
+    public static void debug(String message) {
+        if (isDebugMode()) {
+            LOG.info("DEBUG: {}", message);
+        }
     }
 }

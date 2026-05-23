@@ -21,7 +21,10 @@ public class ClientProxy extends CommonProxy {
         FMLCommonHandler.instance()
             .bus()
             .register(DrawEntriesHandler.INSTANCE);
-        ClientCommandHandler.instance.registerCommand(new CommandTestEntries());
+        if (VintagePickUpNotifier.isDebugMode()) {
+            VintagePickUpNotifier.debug("Registering /vpun_test command");
+            ClientCommandHandler.instance.registerCommand(new CommandTestEntries());
+        }
     }
 
     @Override

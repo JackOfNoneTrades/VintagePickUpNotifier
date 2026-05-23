@@ -44,6 +44,9 @@ public class GuiFactory implements IModGuiFactory {
                 Arrays.asList(
                     new ConfigElement(
                         Config.getRawConfig()
+                            .getCategory(Config.Categories.DEBUG)),
+                    new ConfigElement(
+                        Config.getRawConfig()
                             .getCategory(Config.Categories.GENERAL)),
                     new ConfigElement(
                         Config.getRawConfig()

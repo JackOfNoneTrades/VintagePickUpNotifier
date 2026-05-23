@@ -27,11 +27,14 @@ public class Config {
 
     public static class Categories {
 
+        public static final String DEBUG = "debug";
         public static final String GENERAL = "general";
         public static final String BEHAVIOR = "behavior";
         public static final String DISPLAY = "display";
         public static final String SERVER = "server";
     }
+
+    public static boolean debugMode;
 
     public static boolean clientOnly = false;
     public static boolean includeItems = true;
@@ -75,8 +78,10 @@ public class Config {
         config = new Configuration(file);
 
         try {
+            VintagePickUpNotifier.debug("Loading config");
             config.load();
             configureCategories();
+            loadDebug();
             loadGeneral();
             loadBehavior();
             loadDisplay();
@@ -116,15 +121,21 @@ public class Config {
     }
 
     private static void configureCategories() {
+        config.setCategoryComment(Categories.DEBUG, "Controls debug logging and tools.");
         config.setCategoryComment(Categories.GENERAL, "Controls what pickups are collected.");
         config.setCategoryComment(Categories.BEHAVIOR, "Controls entry lifetime, merging, and movement.");
         config.setCategoryComment(Categories.DISPLAY, "Controls HUD layout and entry rendering.");
         config.setCategoryComment(Categories.SERVER, "Controls server-assisted pickup tracking.");
 
+        config.setCategoryLanguageKey(Categories.DEBUG, langCategory(Categories.DEBUG));
         config.setCategoryLanguageKey(Categories.GENERAL, langCategory(Categories.GENERAL));
         config.setCategoryLanguageKey(Categories.BEHAVIOR, langCategory(Categories.BEHAVIOR));
         config.setCategoryLanguageKey(Categories.DISPLAY, langCategory(Categories.DISPLAY));
         config.setCategoryLanguageKey(Categories.SERVER, langCategory(Categories.SERVER));
+    }
+
+    private static void loadDebug() {
+        debugMode = getBoolean(Categories.DEBUG, "debugMode", debugMode, "Enable debug mode.");
     }
 
     private static void loadGeneral() {
