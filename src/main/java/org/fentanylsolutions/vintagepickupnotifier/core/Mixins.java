@@ -1,7 +1,6 @@
 package org.fentanylsolutions.vintagepickupnotifier.core;
 
 import org.fentanylsolutions.fentlib.core.FentMixins;
-import org.fentanylsolutions.fentlib.util.MiscUtil;
 import org.fentanylsolutions.fentlib.util.MixinUtil;
 
 public class Mixins extends FentMixins {
@@ -11,16 +10,20 @@ public class Mixins extends FentMixins {
     @Override
     protected void registerMixins(MixinUtil.Registry registry) {
         // Minecraft Accessors
-        /*registry.mixin("AccessorNetworkSystem")
-            .phase(MixinUtil.Phase.EARLY)
-            .side(MiscUtil.Side.SERVER)
-            .build();*/
+        /*
+         * registry.mixin("AccessorNetworkSystem")
+         * .phase(MixinUtil.Phase.EARLY)
+         * .side(MiscUtil.Side.SERVER)
+         * .build();
+         */
 
         // Minecraft Mixins
-        /*registry.mixin("MixinNetworkSystem")
-            .phase(MixinUtil.Phase.EARLY)
-            .side(MiscUtil.Side.SERVER)
-            .build();*/
+        /*
+         * registry.mixin("MixinNetworkSystem")
+         * .phase(MixinUtil.Phase.EARLY)
+         * .side(MiscUtil.Side.SERVER)
+         * .build();
+         */
     }
 
     public static java.util.List<String> getEarlyMixinsForLoader() {

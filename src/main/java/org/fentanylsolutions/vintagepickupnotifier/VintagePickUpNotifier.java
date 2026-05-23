@@ -20,7 +20,8 @@ import cpw.mods.fml.common.event.FMLServerStartingEvent;
         @Mod.CustomProperty(
             k = "issueTrackerUrl",
             v = "https://github.com/JackOfNoneTrades/VintagePickUpNotifier/issues"),
-        @Mod.CustomProperty(k = "iconFile", v = "assets/vintagepickupnotifier/logo.png"), })
+        @Mod.CustomProperty(k = "iconFile", v = "assets/vintagepickupnotifier/logo.png"), },
+    guiFactory = "org.fentanylsolutions.vintagepickupnotifier.gui.GuiFactory")
 public class VintagePickUpNotifier {
 
     public static final String MODID = "vintagepickupnotifier";
