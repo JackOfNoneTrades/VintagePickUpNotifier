@@ -15,6 +15,7 @@ import net.minecraft.util.MathHelper;
 import org.fentanylsolutions.vintagepickupnotifier.Config;
 import org.fentanylsolutions.vintagepickupnotifier.config.EntryBackground;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 public class DisplayEntryRenderHelper {
 
@@ -42,10 +43,12 @@ public class DisplayEntryRenderHelper {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, alpha);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         RenderHelper.enableGUIStandardItemLighting();
         RenderItem.getInstance()
             .renderItemAndEffectIntoGUI(minecraft.fontRenderer, minecraft.getTextureManager(), stack, posX, posY);
         RenderHelper.disableStandardItemLighting();
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glPopMatrix();
