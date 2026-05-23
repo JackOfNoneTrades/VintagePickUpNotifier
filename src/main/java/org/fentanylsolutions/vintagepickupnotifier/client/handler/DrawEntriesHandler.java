@@ -162,7 +162,7 @@ public class DrawEntriesHandler {
             }
 
             float alpha = Config.fadeOut ? entry.getRelativeRemainingTicks(partialTicks) : 1.0F;
-            entry.render(minecraft, fontRenderer, elementX, elementY, alpha);
+            entry.render(minecraft, fontRenderer, elementX, elementY, alpha, partialTicks);
             elementY += DisplayEntry.ELEMENT_HEIGHT;
         }
         AngelicaFontBatcher.flush(fontRenderer);

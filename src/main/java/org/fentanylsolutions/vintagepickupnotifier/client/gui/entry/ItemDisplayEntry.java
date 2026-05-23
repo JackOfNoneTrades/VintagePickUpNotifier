@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import org.fentanylsolutions.vintagepickupnotifier.Config;
 import org.fentanylsolutions.vintagepickupnotifier.client.util.DisplayEntryRenderHelper;
 import org.fentanylsolutions.vintagepickupnotifier.config.CombineEntries;
+import org.lwjgl.opengl.GL11;
 
 public final class ItemDisplayEntry extends DisplayEntry<ItemStack> {
 
@@ -52,8 +53,26 @@ public final class ItemDisplayEntry extends DisplayEntry<ItemStack> {
     }
 
     @Override
-    protected void renderSprite(Minecraft minecraft, FontRenderer fontRenderer, int posX, int posY, float alpha) {
-        DisplayEntryRenderHelper.renderItem(minecraft, this.item, posX, posY, alpha);
+    protected void renderSprite(Minecraft minecraft, FontRenderer fontRenderer, int posX, int posY, float alpha,
+        float partialTicks) {
+        float popTime = this.item.animationsToGo - partialTicks;
+        boolean animated = popTime > 0.0F;
+        if (animated) {
+            float popTimeScale = 1.0F + popTime / ITEM_STACK_POP_TIME;
+            GL11.glPushMatrix();
+            GL11.glTranslatef(posX + 8.0F, posY + 12.0F, 0.0F);
+            GL11.glScalef(1.0F / popTimeScale, (popTimeScale + 1.0F) / 2.0F, 1.0F);
+            GL11.glTranslatef(-(posX + 8.0F), -(posY + 12.0F), 0.0F);
+        }
+
+        try {
+            DisplayEntryRenderHelper.renderItem(minecraft, this.item, posX, posY, alpha);
+        } finally {
+            if (animated) {
+                GL11.glPopMatrix();
+            }
+        }
+
         if (Config.displayAmount.isSprite()) {
             DisplayEntryRenderHelper.renderGuiItemCount(fontRenderer, this.getDisplayAmount(), posX, posY, alpha);
         }

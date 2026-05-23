@@ -73,7 +73,8 @@ public abstract class DisplayEntry<T> {
         return textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) + 16;
     }
 
-    public void render(Minecraft minecraft, FontRenderer fontRenderer, int posX, int posY, float alpha) {
+    public void render(Minecraft minecraft, FontRenderer fontRenderer, int posX, int posY, float alpha,
+        float partialTicks) {
         if (alpha <= 0.02F) {
             return;
         }
@@ -89,7 +90,7 @@ public abstract class DisplayEntry<T> {
 
         if (Config.drawSprite) {
             int spriteX = mirrorPosition ? posX + textWidth + (textWidth == 0 ? 0 : TEXT_ITEM_MARGIN) : posX;
-            renderSprite(minecraft, fontRenderer, spriteX, posY, alpha);
+            renderSprite(minecraft, fontRenderer, spriteX, posY, alpha, partialTicks);
         }
     }
 
@@ -156,7 +157,7 @@ public abstract class DisplayEntry<T> {
     protected abstract String getEntryName(T item);
 
     protected abstract void renderSprite(Minecraft minecraft, FontRenderer fontRenderer, int posX, int posY,
-        float alpha);
+        float alpha, float partialTicks);
 
     public abstract DisplayEntry<?> mergeWith(DisplayEntry<?> otherEntry);
 

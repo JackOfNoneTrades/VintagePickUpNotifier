@@ -43,7 +43,8 @@ public final class ExperienceDisplayEntry extends DisplayEntry<String> {
     }
 
     @Override
-    protected void renderSprite(Minecraft minecraft, FontRenderer fontRenderer, int posX, int posY, float alpha) {
+    protected void renderSprite(Minecraft minecraft, FontRenderer fontRenderer, int posX, int posY, float alpha,
+        float partialTicks) {
         int textureOffset = getXpTexture(this.getDisplayAmount());
         int textureX = textureOffset % 4 * 16;
         int textureY = textureOffset / 4 * 16;
