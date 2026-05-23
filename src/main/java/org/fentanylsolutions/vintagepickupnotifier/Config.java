@@ -285,7 +285,7 @@ public class Config {
             Categories.SERVER,
             "partial_pickups",
             partialPickUps,
-            "Collect partial pickup entries when there is not enough room in the inventory.");
+            "Show item pickups when only part of a ground stack fits in the player's inventory.");
         backpackIntegration = getBoolean(
             Categories.SERVER,
             "backpack_integration",

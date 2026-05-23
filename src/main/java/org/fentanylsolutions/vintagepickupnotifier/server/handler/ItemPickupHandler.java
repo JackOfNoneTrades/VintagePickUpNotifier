@@ -40,6 +40,9 @@ public class ItemPickupHandler {
         if (pickedAmount <= 0) {
             return;
         }
+        if (!Config.partialPickUps && pickedAmount < itemStack.stackSize) {
+            return;
+        }
 
         ItemStack pickedStack = itemStack.copy();
         pickedStack.stackSize = pickedAmount;
