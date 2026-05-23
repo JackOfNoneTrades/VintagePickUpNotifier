@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 
 import org.fentanylsolutions.vintagepickupnotifier.Config;
+import org.fentanylsolutions.vintagepickupnotifier.client.compat.AngelicaFontBatcher;
 import org.fentanylsolutions.vintagepickupnotifier.config.EntryBackground;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -63,11 +64,13 @@ public class DisplayEntryRenderHelper {
         float scale = Math.min(1.0F, 16.0F / Math.max(1, fontRenderer.getStringWidth(text)));
         int color = MathHelper.clamp_int((int) (alpha * 255.0F), 0, 255) << 24 | 0xFFFFFF;
 
+        AngelicaFontBatcher.flush(fontRenderer);
         GL11.glPushMatrix();
         GL11.glScalef(scale, scale, 1.0F);
         int textX = (int) ((posX + 17) / scale) - fontRenderer.getStringWidth(text);
         int textY = (int) ((posY + fontRenderer.FONT_HEIGHT * 2) / scale) - fontRenderer.FONT_HEIGHT;
         fontRenderer.drawStringWithShadow(text, textX, textY, color);
+        AngelicaFontBatcher.flush(fontRenderer);
         GL11.glPopMatrix();
     }
 

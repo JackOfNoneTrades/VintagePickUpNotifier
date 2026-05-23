@@ -17,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 import org.fentanylsolutions.vintagepickupnotifier.Config;
+import org.fentanylsolutions.vintagepickupnotifier.client.compat.AngelicaFontBatcher;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.DisplayEntry;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ItemDisplayEntry;
@@ -147,6 +148,7 @@ public class DrawEntriesHandler {
         int posY = positioner.getPosY(offsetY - getMoveOffset(entries, partialTicks));
         int elementY = posY;
 
+        AngelicaFontBatcher.flush(fontRenderer);
         org.lwjgl.opengl.GL11.glPushMatrix();
         org.lwjgl.opengl.GL11.glScalef(scale, scale, 1.0F);
         for (DisplayEntry<?> entry : entries) {
@@ -163,6 +165,7 @@ public class DrawEntriesHandler {
             entry.render(minecraft, fontRenderer, elementX, elementY, alpha);
             elementY += DisplayEntry.ELEMENT_HEIGHT;
         }
+        AngelicaFontBatcher.flush(fontRenderer);
         org.lwjgl.opengl.GL11.glPopMatrix();
     }
 
