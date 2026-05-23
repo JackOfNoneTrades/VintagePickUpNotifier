@@ -21,15 +21,35 @@ public class AddEntriesHandler {
         if (world == null || minecraft.thePlayer == null || minecraft.thePlayer.getEntityId() != playerId) {
             return;
         }
+        if (DrawEntriesHandler.INSTANCE.isEntityHandled(entityId)) {
+            return;
+        }
 
         Entity entity = world.getEntityByID(entityId);
+        boolean added = false;
         if (entity instanceof EntityItem) {
-            addItemEntityEntry((EntityItem) entity);
+            added = addItemEntityEntry((EntityItem) entity);
         } else if (entity instanceof EntityArrow) {
-            addArrowEntry();
+            added = addArrowEntry();
         } else if (entity instanceof EntityXPOrb) {
-            addExperienceEntry((EntityXPOrb) entity);
+            added = addExperienceEntry((EntityXPOrb) entity);
         }
+
+        if (added) {
+            DrawEntriesHandler.INSTANCE.addHandledEntity(entityId);
+        }
+    }
+
+    public static void addItemStackEntry(int entityId, ItemStack itemStack) {
+        if (Config.clientOnly) {
+            return;
+        }
+        if (DrawEntriesHandler.INSTANCE.isEntityHandled(entityId)) {
+            return;
+        }
+
+        DrawEntriesHandler.INSTANCE.addHandledEntity(entityId);
+        addItemEntry(itemStack);
     }
 
     public static void addItemEntry(ItemStack itemStack) {
@@ -38,49 +58,49 @@ public class AddEntriesHandler {
         }
     }
 
-    private static void addItemEntityEntry(EntityItem entityItem) {
+    private static boolean addItemEntityEntry(EntityItem entityItem) {
         if (!Config.includeItems) {
-            return;
+            return false;
         }
 
         ItemStack itemStack = entityItem.getEntityItem();
         if (itemStack == null || itemStack.getItem() == null || itemStack.stackSize <= 0) {
-            return;
+            return false;
         }
 
         int amount = getPickupAmount(itemStack);
         if (!Config.partialPickUps && amount < itemStack.stackSize) {
-            return;
+            return false;
         }
 
-        addItemEntry(itemStack, amount);
+        return addItemEntry(itemStack, amount);
     }
 
-    private static void addArrowEntry() {
-        if (Config.includeArrows) {
-            addItemEntry(new ItemStack(Items.arrow), 1);
-        }
+    private static boolean addArrowEntry() {
+        return Config.includeArrows && addItemEntry(new ItemStack(Items.arrow), 1);
     }
 
-    private static void addExperienceEntry(EntityXPOrb orb) {
+    private static boolean addExperienceEntry(EntityXPOrb orb) {
         if (!Config.includeExperience || orb.xpValue <= 0) {
-            return;
+            return false;
         }
 
         int amount = Config.experienceValue ? orb.xpValue : 1;
         DrawEntriesHandler.INSTANCE
             .addEntry(new ExperienceDisplayEntry(orb.getCommandSenderName(), amount, orb.xpColor));
+        return true;
     }
 
-    private static void addItemEntry(ItemStack itemStack, int amount) {
+    private static boolean addItemEntry(ItemStack itemStack, int amount) {
         if (itemStack == null || itemStack.getItem() == null
             || itemStack.stackSize <= 0
             || amount <= 0
             || Config.isItemHidden(itemStack)) {
-            return;
+            return false;
         }
 
         DrawEntriesHandler.INSTANCE.addEntry(new ItemDisplayEntry(itemStack, amount));
+        return true;
     }
 
     private static int getPickupAmount(ItemStack itemStack) {

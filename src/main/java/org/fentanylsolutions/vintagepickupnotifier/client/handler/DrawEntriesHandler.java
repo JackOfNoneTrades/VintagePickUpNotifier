@@ -2,9 +2,12 @@ package org.fentanylsolutions.vintagepickupnotifier.client.handler;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -26,8 +29,10 @@ import cpw.mods.fml.common.gameevent.TickEvent;
 public class DrawEntriesHandler {
 
     public static final DrawEntriesHandler INSTANCE = new DrawEntriesHandler();
+    private static final int HANDLED_ENTITY_TICKS = 40;
 
     private final Map<Object, DisplayEntry<?>> collector = new LinkedHashMap<>();
+    private final Map<Integer, Integer> handledEntities = new HashMap<>();
 
     private DrawEntriesHandler() {}
 
@@ -54,6 +59,14 @@ public class DrawEntriesHandler {
         this.collector.put(displayEntry.getKey(), displayEntry);
     }
 
+    public boolean isEntityHandled(int entityId) {
+        return this.handledEntities.containsKey(entityId);
+    }
+
+    public void addHandledEntity(int entityId) {
+        this.handledEntities.put(entityId, HANDLED_ENTITY_TICKS);
+    }
+
     public void addDebugEntries() {
         Minecraft minecraft = Minecraft.getMinecraft();
         ItemStack stack = minecraft.thePlayer != null ? minecraft.thePlayer.getCurrentEquippedItem() : null;
@@ -66,6 +79,7 @@ public class DrawEntriesHandler {
 
     public void clear() {
         this.collector.clear();
+        this.handledEntities.clear();
     }
 
     @SubscribeEvent
@@ -83,6 +97,20 @@ public class DrawEntriesHandler {
             if (Config.displayTime != 0) {
                 this.collector.values()
                     .removeIf(DisplayEntry::mayDiscard);
+            }
+        }
+
+        if (!this.handledEntities.isEmpty()) {
+            Iterator<Entry<Integer, Integer>> iterator = this.handledEntities.entrySet()
+                .iterator();
+            while (iterator.hasNext()) {
+                Entry<Integer, Integer> entry = iterator.next();
+                int remainingTicks = entry.getValue() - 1;
+                if (remainingTicks <= 0) {
+                    iterator.remove();
+                } else {
+                    entry.setValue(remainingTicks);
+                }
             }
         }
     }
