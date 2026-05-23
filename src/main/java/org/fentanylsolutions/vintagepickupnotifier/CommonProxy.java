@@ -5,6 +5,7 @@ import net.minecraftforge.common.MinecraftForge;
 
 import org.fentanylsolutions.vintagepickupnotifier.network.NetworkHandler;
 import org.fentanylsolutions.vintagepickupnotifier.server.handler.ItemPickupHandler;
+import org.fentanylsolutions.vintagepickupnotifier.server.handler.OkBackpackPickupHandler;
 
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
@@ -21,6 +22,7 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(ItemPickupHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(OkBackpackPickupHandler.INSTANCE);
     }
 
     public void postInit(FMLPostInitializationEvent event) {}

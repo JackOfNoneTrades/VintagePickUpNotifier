@@ -6,3 +6,4 @@ vintagepickupnotifier.config.category.display=Display
 vintagepickupnotifier.config.category.server=Server
 vintagepickupnotifier.config.debug.debugMode=Debug Mode
 vintagepickupnotifier.config.server.partial_pickups=Partial Pickups
+vintagepickupnotifier.config.server.backpack_integration=Backpack Integration
