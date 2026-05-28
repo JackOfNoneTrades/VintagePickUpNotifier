@@ -115,6 +115,7 @@ public class AddEntriesHandler {
         if (itemStack == null || itemStack.getItem() == null
             || itemStack.stackSize <= 0
             || amount <= 0
+            || !Config.shouldDisplayCount(amount)
             || Config.isItemHidden(itemStack)) {
             return false;
         }

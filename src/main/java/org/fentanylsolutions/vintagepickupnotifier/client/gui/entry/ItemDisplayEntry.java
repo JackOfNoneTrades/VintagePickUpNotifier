@@ -20,8 +20,14 @@ public final class ItemDisplayEntry extends DisplayEntry<ItemStack> {
     private static final int ITEM_STACK_POP_TIME = 5;
 
     public ItemDisplayEntry(ItemStack itemStack, int displayAmount) {
-        super(itemStack.copy(), displayAmount, itemStack.getRarity());
+        super(copyForDisplay(itemStack), displayAmount, itemStack.getRarity());
         this.item.animationsToGo = ITEM_STACK_POP_TIME;
+    }
+
+    private static ItemStack copyForDisplay(ItemStack itemStack) {
+        ItemStack copy = itemStack.copy();
+        copy.stackSize = 1;
+        return copy;
     }
 
     @Override
@@ -48,7 +54,7 @@ public final class ItemDisplayEntry extends DisplayEntry<ItemStack> {
 
     @Override
     protected void appendTextComponents(List<String> components, boolean reverse) {
-        if (Config.inventoryCount) {
+        if (Config.inventoryCount && shouldDisplayAmount()) {
             components.add("(" + getInventoryCount() + ")");
         }
 

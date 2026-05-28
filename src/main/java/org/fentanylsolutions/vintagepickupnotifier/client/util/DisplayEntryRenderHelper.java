@@ -159,7 +159,7 @@ public class DisplayEntryRenderHelper {
     }
 
     public static void renderGuiItemCount(FontRenderer fontRenderer, int count, int posX, int posY, float alpha) {
-        if (count <= 1 && !Config.displaySingleCount) {
+        if (!Config.shouldDisplayCount(count)) {
             return;
         }
 

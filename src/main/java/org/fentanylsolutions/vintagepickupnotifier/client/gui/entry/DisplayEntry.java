@@ -107,7 +107,7 @@ public abstract class DisplayEntry<T> {
     }
 
     protected boolean shouldDisplayAmount() {
-        return this.displayAmount > 1 || this.displayAmount == 1 && Config.displaySingleCount;
+        return Config.shouldDisplayCount(this.displayAmount);
     }
 
     protected String getFormattedText() {

@@ -121,6 +121,10 @@ public class Config {
         return stack != null && stack.getItem() != null && hiddenItems.contains(stack.getItem());
     }
 
+    public static boolean shouldDisplayCount(int count) {
+        return count > 1 || count == 1 && displaySingleCount;
+    }
+
     private static void configureCategories() {
         config.setCategoryComment(Categories.DEBUG, "Controls debug logging and tools.");
         config.setCategoryComment(Categories.GENERAL, "Controls what pickups are collected.");
@@ -268,7 +272,7 @@ public class Config {
             Categories.DISPLAY,
             "display_single_count",
             displaySingleCount,
-            "Show the picked up amount when it is just a single item.");
+            "Show pickups when the picked up amount is just a single item.");
         entryBackground = getEnum(
             Categories.DISPLAY,
             "entry_background",
