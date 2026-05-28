@@ -40,21 +40,23 @@ public abstract class DisplayEntry<T> {
     }
 
     public boolean mayDiscard() {
-        return this.remainingTicks <= 0;
+        return Config.displayTime != 0 && this.remainingTicks <= -getTransitionTime();
     }
 
     public void tick() {
-        if (this.remainingTicks > 0) {
+        if (Config.displayTime != 0 && this.remainingTicks > -getTransitionTime()) {
             this.remainingTicks--;
         }
     }
 
     public float getRelativeRemainingTicks(float partialTicks) {
-        if (Config.displayTime == 0 || Config.getMoveTime() <= 0) {
+        int transitionTime = getTransitionTime();
+        if (Config.displayTime == 0 || transitionTime <= 0 || this.remainingTicks > 0) {
             return 1.0F;
         }
 
-        return MathHelper.clamp_float((this.remainingTicks - partialTicks) / Config.getMoveTime(), 0.0F, 1.0F);
+        return MathHelper
+            .clamp_float((transitionTime + this.remainingTicks - partialTicks) / transitionTime, 0.0F, 1.0F);
     }
 
     public static float getExpiredRows(Collection<DisplayEntry<?>> entries, float partialTicks) {
@@ -152,6 +154,18 @@ public abstract class DisplayEntry<T> {
     private static int toAlphaColor(float alpha) {
         int alphaBits = MathHelper.clamp_int((int) (alpha * 255.0F), 0, 255);
         return alphaBits << 24 | 0xFFFFFF;
+    }
+
+    private static int getTransitionTime() {
+        if (Config.getMoveTime() <= 0 || !isTransitionEnabled()) {
+            return 0;
+        }
+        return Config.getMoveTime();
+    }
+
+    private static boolean isTransitionEnabled() {
+        return Config.fadeOut || Config.moveOut.moveHorizontally(Config.position)
+            || Config.moveOut.moveVertically(Config.position);
     }
 
     protected abstract String getEntryName(T item);

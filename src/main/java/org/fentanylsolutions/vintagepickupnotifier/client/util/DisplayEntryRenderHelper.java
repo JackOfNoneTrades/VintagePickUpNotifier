@@ -7,8 +7,11 @@ import java.util.TreeMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.RenderItem;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.MathHelper;
 
@@ -20,7 +23,10 @@ import org.lwjgl.opengl.GL12;
 
 public class DisplayEntryRenderHelper {
 
+    private static final int ITEM_FRAMEBUFFER_SIZE = 32;
+    private static final int ITEM_FRAMEBUFFER_PADDING = 8;
     private static final NavigableMap<Integer, String> COUNT_SUFFIXES = new TreeMap<>();
+    private static Framebuffer itemFramebuffer;
 
     static {
         COUNT_SUFFIXES.put(1_000, "K");
@@ -40,9 +46,21 @@ public class DisplayEntryRenderHelper {
     }
 
     public static void renderItem(Minecraft minecraft, ItemStack stack, int posX, int posY, float alpha) {
+        if (alpha >= 0.99F || !OpenGlHelper.isFramebufferEnabled()) {
+            renderItemDirect(minecraft, stack, posX, posY);
+            return;
+        }
+
+        renderItemToFramebuffer(minecraft, stack);
+        minecraft.getFramebuffer()
+            .bindFramebuffer(true);
+        renderItemFramebuffer(posX - ITEM_FRAMEBUFFER_PADDING, posY - ITEM_FRAMEBUFFER_PADDING, alpha);
+    }
+
+    private static void renderItemDirect(Minecraft minecraft, ItemStack stack, int posX, int posY) {
         GL11.glPushMatrix();
         GL11.glEnable(GL11.GL_BLEND);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, alpha);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);
         RenderHelper.enableGUIStandardItemLighting();
@@ -53,6 +71,68 @@ public class DisplayEntryRenderHelper {
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glPopMatrix();
+    }
+
+    private static void renderItemToFramebuffer(Minecraft minecraft, ItemStack stack) {
+        Framebuffer framebuffer = getItemFramebuffer();
+        framebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
+        framebuffer.framebufferClear();
+        framebuffer.bindFramebuffer(true);
+
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glPushMatrix();
+        GL11.glLoadIdentity();
+        GL11.glOrtho(0.0D, ITEM_FRAMEBUFFER_SIZE, ITEM_FRAMEBUFFER_SIZE, 0.0D, 1000.0D, 3000.0D);
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPushMatrix();
+        GL11.glLoadIdentity();
+        GL11.glTranslatef(0.0F, 0.0F, -2000.0F);
+
+        renderItemDirect(minecraft, stack, ITEM_FRAMEBUFFER_PADDING, ITEM_FRAMEBUFFER_PADDING);
+
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPopMatrix();
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glPopMatrix();
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPopAttrib();
+    }
+
+    private static void renderItemFramebuffer(int posX, int posY, float alpha) {
+        Framebuffer framebuffer = getItemFramebuffer();
+
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
+        GL11.glDepthMask(false);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        GL11.glEnable(GL11.GL_BLEND);
+        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, alpha);
+        framebuffer.bindFramebufferTexture();
+
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+        tessellator.setColorRGBA_F(1.0F, 1.0F, 1.0F, alpha);
+        tessellator.addVertexWithUV(posX, posY + ITEM_FRAMEBUFFER_SIZE, 0.0D, 0.0D, 0.0D);
+        tessellator.addVertexWithUV(posX + ITEM_FRAMEBUFFER_SIZE, posY + ITEM_FRAMEBUFFER_SIZE, 0.0D, 1.0D, 0.0D);
+        tessellator.addVertexWithUV(posX + ITEM_FRAMEBUFFER_SIZE, posY, 0.0D, 1.0D, 1.0D);
+        tessellator.addVertexWithUV(posX, posY, 0.0D, 0.0D, 1.0D);
+        tessellator.draw();
+
+        framebuffer.unbindFramebufferTexture();
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+        GL11.glDepthMask(true);
+        GL11.glPopAttrib();
+    }
+
+    private static Framebuffer getItemFramebuffer() {
+        if (itemFramebuffer == null) {
+            itemFramebuffer = new Framebuffer(ITEM_FRAMEBUFFER_SIZE, ITEM_FRAMEBUFFER_SIZE, true);
+        }
+        return itemFramebuffer;
     }
 
     public static void renderGuiItemCount(FontRenderer fontRenderer, int count, int posX, int posY, float alpha) {
