@@ -5,9 +5,12 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 import org.fentanylsolutions.vintagepickupnotifier.Config;
+import org.fentanylsolutions.vintagepickupnotifier.VintagePickUpNotifier;
 import org.fentanylsolutions.vintagepickupnotifier.client.util.DisplayEntryRenderHelper;
 import org.fentanylsolutions.vintagepickupnotifier.config.CombineEntries;
 import org.lwjgl.opengl.GL11;
@@ -86,7 +89,7 @@ public final class ItemDisplayEntry extends DisplayEntry<ItemStack> {
         int count = 0;
         InventoryPlayer inventory = Minecraft.getMinecraft().thePlayer.inventory;
         for (ItemStack stack : inventory.mainInventory) {
-            if (stack != null && stack.isItemEqual(this.item) && ItemStack.areItemStackTagsEqual(stack, this.item)) {
+            if (stack != null && stack.isItemEqual(this.item) && itemTagsMatch(stack, this.item)) {
                 count += stack.stackSize;
             }
         }
@@ -103,9 +106,19 @@ public final class ItemDisplayEntry extends DisplayEntry<ItemStack> {
         }
 
         ItemDisplayEntry other = (ItemDisplayEntry) obj;
-        if (!this.item.isItemEqual(other.item) || !ItemStack.areItemStackTagsEqual(this.item, other.item)
-            || this.item.getRarity() != other.item.getRarity()
-            || this.item.isItemEnchanted() != other.item.isItemEnchanted()) {
+        if (!this.item.isItemEqual(other.item)) {
+            debugMergeMismatch("item or damage differs", this.item, other.item);
+            return false;
+        }
+        if (!itemTagsMatch(this.item, other.item, true)) {
+            return false;
+        }
+        if (this.item.getRarity() != other.item.getRarity()) {
+            debugMergeMismatch("rarity differs", this.item, other.item);
+            return false;
+        }
+        if (this.item.isItemEnchanted() != other.item.isItemEnchanted()) {
+            debugMergeMismatch("enchantment glint differs", this.item, other.item);
             return false;
         }
 
@@ -119,5 +132,73 @@ public final class ItemDisplayEntry extends DisplayEntry<ItemStack> {
             .hashCode();
         result = 31 * result + this.item.getItemDamage();
         return result;
+    }
+
+    private static boolean itemTagsMatch(ItemStack first, ItemStack second) {
+        return itemTagsMatch(first, second, false);
+    }
+
+    private static boolean itemTagsMatch(ItemStack first, ItemStack second, boolean logMismatch) {
+        if (Config.combineEntries != CombineEntries.ALWAYS) {
+            return ItemStack.areItemStackTagsEqual(first, second);
+        }
+
+        NBTTagCompound firstTag = normalizeAlwaysTag(first.stackTagCompound);
+        NBTTagCompound secondTag = normalizeAlwaysTag(second.stackTagCompound);
+        boolean matches = firstTag == null && secondTag == null || firstTag != null && firstTag.equals(secondTag);
+        if (!matches && logMismatch) {
+            debugMergeMismatch("normalized tags differ", first, second);
+        }
+        return matches;
+    }
+
+    private static NBTTagCompound normalizeAlwaysTag(NBTTagCompound tag) {
+        if (tag == null) {
+            return null;
+        }
+
+        NBTTagCompound copy = (NBTTagCompound) tag.copy();
+        copy.removeTag("RepairCost");
+        if (copy.hasKey("display", 10)) {
+            NBTTagCompound display = copy.getCompoundTag("display");
+            display.removeTag("Name");
+            if (display.hasNoTags()) {
+                copy.removeTag("display");
+            }
+        }
+        return copy.hasNoTags() ? null : copy;
+    }
+
+    private static void debugMergeMismatch(String reason, ItemStack first, ItemStack second) {
+        if (Config.combineEntries != CombineEntries.ALWAYS) {
+            return;
+        }
+
+        VintagePickUpNotifier.debug(
+            "Not combining item entries because " + reason
+                + ": "
+                + describeStack(first)
+                + " vs "
+                + describeStack(second));
+    }
+
+    private static String describeStack(ItemStack stack) {
+        if (stack == null) {
+            return "null";
+        }
+
+        return stack.stackSize + "x "
+            + Item.itemRegistry.getNameForObject(stack.getItem())
+            + "@"
+            + stack.getItemDamage()
+            + " display='"
+            + stack.getDisplayName()
+            + "' base='"
+            + stack.getItem()
+                .getItemStackDisplayName(stack)
+            + "' tag="
+            + stack.stackTagCompound
+            + " normalizedTag="
+            + normalizeAlwaysTag(stack.stackTagCompound);
     }
 }
