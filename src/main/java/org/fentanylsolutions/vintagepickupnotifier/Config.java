@@ -24,6 +24,7 @@ public class Config {
 
     private static Configuration config;
     private static File configFile;
+    private static final boolean DEFAULT_EXPERIENCE_VALUE = true;
 
     public static class Categories {
 
@@ -40,7 +41,7 @@ public class Config {
     public static boolean includeItems = true;
     public static boolean includeExperience = true;
     public static boolean includeArrows = true;
-    public static boolean experienceValue = true;
+    public static boolean experienceValue = DEFAULT_EXPERIENCE_VALUE;
     public static boolean disableInCreative = false;
     public static String[] hiddenItemsRaw = new String[0];
     public static Set<Item> hiddenItems = Collections.emptySet();
@@ -162,7 +163,7 @@ public class Config {
         experienceValue = getBoolean(
             Categories.GENERAL,
             "experience_value",
-            experienceValue,
+            DEFAULT_EXPERIENCE_VALUE,
             "Show the value of experience points collected instead of the amount of individual orbs.");
         disableInCreative = getBoolean(
             Categories.GENERAL,

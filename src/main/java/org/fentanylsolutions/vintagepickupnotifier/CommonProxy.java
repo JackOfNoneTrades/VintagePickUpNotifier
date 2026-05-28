@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 
 import org.fentanylsolutions.vintagepickupnotifier.network.NetworkHandler;
+import org.fentanylsolutions.vintagepickupnotifier.server.handler.ExperiencePickupHandler;
 import org.fentanylsolutions.vintagepickupnotifier.server.handler.ItemPickupHandler;
 import org.fentanylsolutions.vintagepickupnotifier.server.handler.OkBackpackPickupHandler;
 
@@ -22,6 +23,7 @@ public class CommonProxy {
 
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(ItemPickupHandler.INSTANCE);
+        MinecraftForge.EVENT_BUS.register(ExperiencePickupHandler.INSTANCE);
         MinecraftForge.EVENT_BUS.register(OkBackpackPickupHandler.INSTANCE);
     }
 
@@ -30,4 +32,6 @@ public class CommonProxy {
     public void serverStarting(FMLServerStartingEvent event) {}
 
     public void handleTakeItemStackMessage(int entityId, ItemStack itemStack) {}
+
+    public void handleTakeExperienceMessage(int entityId, int experienceValue, int tickCount) {}
 }

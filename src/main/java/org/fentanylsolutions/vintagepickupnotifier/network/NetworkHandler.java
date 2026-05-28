@@ -16,5 +16,10 @@ public class NetworkHandler {
             ClientboundTakeItemStackMessage.class,
             discriminator++,
             Side.CLIENT);
+        CHANNEL.registerMessage(
+            ClientboundTakeExperienceMessage.Handler.class,
+            ClientboundTakeExperienceMessage.class,
+            discriminator++,
+            Side.CLIENT);
     }
 }

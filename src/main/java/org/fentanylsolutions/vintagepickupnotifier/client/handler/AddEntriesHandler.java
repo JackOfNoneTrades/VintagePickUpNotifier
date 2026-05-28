@@ -52,6 +52,19 @@ public class AddEntriesHandler {
         addItemEntry(itemStack);
     }
 
+    public static void addExperienceEntry(int entityId, int experienceValue, int tickCount) {
+        if (Config.clientOnly) {
+            return;
+        }
+        if (DrawEntriesHandler.INSTANCE.isEntityHandled(entityId)) {
+            return;
+        }
+
+        if (addExperienceEntry("Experience", experienceValue, tickCount)) {
+            DrawEntriesHandler.INSTANCE.addHandledEntity(entityId);
+        }
+    }
+
     public static void addItemEntry(ItemStack itemStack) {
         if (Config.includeItems && itemStack != null) {
             addItemEntry(itemStack, itemStack.stackSize);
@@ -81,13 +94,20 @@ public class AddEntriesHandler {
     }
 
     private static boolean addExperienceEntry(EntityXPOrb orb) {
-        if (!Config.includeExperience || orb.xpValue <= 0) {
+        if (orb.xpValue <= 0) {
             return false;
         }
 
-        int amount = Config.experienceValue ? orb.xpValue : 1;
-        DrawEntriesHandler.INSTANCE
-            .addEntry(new ExperienceDisplayEntry(orb.getCommandSenderName(), amount, orb.xpColor));
+        return addExperienceEntry(orb.getCommandSenderName(), orb.xpValue, orb.xpColor);
+    }
+
+    private static boolean addExperienceEntry(String name, int experienceValue, int tickCount) {
+        if (!Config.includeExperience || experienceValue <= 0) {
+            return false;
+        }
+
+        int amount = Config.experienceValue ? experienceValue : 1;
+        DrawEntriesHandler.INSTANCE.addEntry(new ExperienceDisplayEntry(name, amount, tickCount));
         return true;
     }
 

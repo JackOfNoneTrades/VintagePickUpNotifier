@@ -39,4 +39,16 @@ public class ClientProxy extends CommonProxy {
                 }
             });
     }
+
+    @Override
+    public void handleTakeExperienceMessage(final int entityId, final int experienceValue, final int tickCount) {
+        Minecraft.getMinecraft()
+            .func_152344_a(new Runnable() {
+
+                @Override
+                public void run() {
+                    AddEntriesHandler.addExperienceEntry(entityId, experienceValue, tickCount);
+                }
+            });
+    }
 }
