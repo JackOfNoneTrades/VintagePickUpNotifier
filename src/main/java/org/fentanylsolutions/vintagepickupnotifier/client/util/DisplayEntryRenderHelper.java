@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
@@ -23,7 +24,7 @@ import org.lwjgl.opengl.GL12;
 
 public class DisplayEntryRenderHelper {
 
-    private static final int ITEM_FRAMEBUFFER_SIZE = 32;
+    private static final int ITEM_FRAMEBUFFER_LOGICAL_SIZE = 32;
     private static final int ITEM_FRAMEBUFFER_PADDING = 8;
     private static final NavigableMap<Integer, String> COUNT_SUFFIXES = new TreeMap<>();
     private static Framebuffer itemFramebuffer;
@@ -51,10 +52,10 @@ public class DisplayEntryRenderHelper {
             return;
         }
 
-        renderItemToFramebuffer(minecraft, stack);
+        Framebuffer framebuffer = renderItemToFramebuffer(minecraft, stack);
         minecraft.getFramebuffer()
             .bindFramebuffer(true);
-        renderItemFramebuffer(posX - ITEM_FRAMEBUFFER_PADDING, posY - ITEM_FRAMEBUFFER_PADDING, alpha);
+        renderItemFramebuffer(framebuffer, posX - ITEM_FRAMEBUFFER_PADDING, posY - ITEM_FRAMEBUFFER_PADDING, alpha);
     }
 
     private static void renderItemDirect(Minecraft minecraft, ItemStack stack, int posX, int posY) {
@@ -73,8 +74,8 @@ public class DisplayEntryRenderHelper {
         GL11.glPopMatrix();
     }
 
-    private static void renderItemToFramebuffer(Minecraft minecraft, ItemStack stack) {
-        Framebuffer framebuffer = getItemFramebuffer();
+    private static Framebuffer renderItemToFramebuffer(Minecraft minecraft, ItemStack stack) {
+        Framebuffer framebuffer = getItemFramebuffer(minecraft);
         framebuffer.setFramebufferColor(0.0F, 0.0F, 0.0F, 0.0F);
         framebuffer.framebufferClear();
         framebuffer.bindFramebuffer(true);
@@ -83,7 +84,7 @@ public class DisplayEntryRenderHelper {
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPushMatrix();
         GL11.glLoadIdentity();
-        GL11.glOrtho(0.0D, ITEM_FRAMEBUFFER_SIZE, ITEM_FRAMEBUFFER_SIZE, 0.0D, 1000.0D, 3000.0D);
+        GL11.glOrtho(0.0D, ITEM_FRAMEBUFFER_LOGICAL_SIZE, ITEM_FRAMEBUFFER_LOGICAL_SIZE, 0.0D, 1000.0D, 3000.0D);
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glPushMatrix();
         GL11.glLoadIdentity();
@@ -97,11 +98,11 @@ public class DisplayEntryRenderHelper {
         GL11.glPopMatrix();
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glPopAttrib();
+
+        return framebuffer;
     }
 
-    private static void renderItemFramebuffer(int posX, int posY, float alpha) {
-        Framebuffer framebuffer = getItemFramebuffer();
-
+    private static void renderItemFramebuffer(Framebuffer framebuffer, int posX, int posY, float alpha) {
         GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glDepthMask(false);
@@ -114,12 +115,19 @@ public class DisplayEntryRenderHelper {
         framebuffer.bindFramebufferTexture();
 
         Tessellator tessellator = Tessellator.instance;
+        double maxU = (double) framebuffer.framebufferWidth / framebuffer.framebufferTextureWidth;
+        double maxV = (double) framebuffer.framebufferHeight / framebuffer.framebufferTextureHeight;
         tessellator.startDrawingQuads();
         tessellator.setColorRGBA_F(1.0F, 1.0F, 1.0F, alpha);
-        tessellator.addVertexWithUV(posX, posY + ITEM_FRAMEBUFFER_SIZE, 0.0D, 0.0D, 0.0D);
-        tessellator.addVertexWithUV(posX + ITEM_FRAMEBUFFER_SIZE, posY + ITEM_FRAMEBUFFER_SIZE, 0.0D, 1.0D, 0.0D);
-        tessellator.addVertexWithUV(posX + ITEM_FRAMEBUFFER_SIZE, posY, 0.0D, 1.0D, 1.0D);
-        tessellator.addVertexWithUV(posX, posY, 0.0D, 0.0D, 1.0D);
+        tessellator.addVertexWithUV(posX, posY + ITEM_FRAMEBUFFER_LOGICAL_SIZE, 0.0D, 0.0D, 0.0D);
+        tessellator.addVertexWithUV(
+            posX + ITEM_FRAMEBUFFER_LOGICAL_SIZE,
+            posY + ITEM_FRAMEBUFFER_LOGICAL_SIZE,
+            0.0D,
+            maxU,
+            0.0D);
+        tessellator.addVertexWithUV(posX + ITEM_FRAMEBUFFER_LOGICAL_SIZE, posY, 0.0D, maxU, maxV);
+        tessellator.addVertexWithUV(posX, posY, 0.0D, 0.0D, maxV);
         tessellator.draw();
 
         framebuffer.unbindFramebufferTexture();
@@ -128,11 +136,26 @@ public class DisplayEntryRenderHelper {
         GL11.glPopAttrib();
     }
 
-    private static Framebuffer getItemFramebuffer() {
-        if (itemFramebuffer == null) {
-            itemFramebuffer = new Framebuffer(ITEM_FRAMEBUFFER_SIZE, ITEM_FRAMEBUFFER_SIZE, true);
+    private static Framebuffer getItemFramebuffer(Minecraft minecraft) {
+        int size = getItemFramebufferSize(minecraft);
+        if (itemFramebuffer == null || itemFramebuffer.framebufferWidth != size
+            || itemFramebuffer.framebufferHeight != size) {
+            if (itemFramebuffer != null) {
+                itemFramebuffer.deleteFramebuffer();
+            }
+
+            itemFramebuffer = new Framebuffer(size, size, true);
+            itemFramebuffer.setFramebufferFilter(GL11.GL_NEAREST);
         }
         return itemFramebuffer;
+    }
+
+    private static int getItemFramebufferSize(Minecraft minecraft) {
+        ScaledResolution resolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
+        float screenScale = Config.getDisplayScale() * resolution.getScaleFactor();
+        return Math.max(
+            ITEM_FRAMEBUFFER_LOGICAL_SIZE,
+            MathHelper.ceiling_float_int(ITEM_FRAMEBUFFER_LOGICAL_SIZE * screenScale));
     }
 
     public static void renderGuiItemCount(FontRenderer fontRenderer, int count, int posX, int posY, float alpha) {
