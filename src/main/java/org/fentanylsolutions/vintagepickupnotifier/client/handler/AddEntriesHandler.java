@@ -13,6 +13,7 @@ import net.minecraft.world.World;
 import org.fentanylsolutions.vintagepickupnotifier.Config;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ItemDisplayEntry;
+import org.fentanylsolutions.vintagepickupnotifier.config.CombineEntries;
 
 public class AddEntriesHandler {
 
@@ -118,6 +119,13 @@ public class AddEntriesHandler {
             || !Config.shouldDisplayCount(amount)
             || Config.isItemHidden(itemStack)) {
             return false;
+        }
+
+        if (Config.combineEntries == CombineEntries.NEVER) {
+            for (int i = 0; i < amount; i++) {
+                DrawEntriesHandler.INSTANCE.addEntry(new ItemDisplayEntry(itemStack, 1));
+            }
+            return true;
         }
 
         DrawEntriesHandler.INSTANCE.addEntry(new ItemDisplayEntry(itemStack, amount));

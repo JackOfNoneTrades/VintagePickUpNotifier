@@ -22,6 +22,7 @@ import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.DisplayEntry
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ItemDisplayEntry;
 import org.fentanylsolutions.vintagepickupnotifier.config.AnchorPoint;
+import org.fentanylsolutions.vintagepickupnotifier.config.CombineEntries;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
@@ -45,7 +46,8 @@ public class DrawEntriesHandler {
         }
 
         int maxSize = getMaxEntryCount(minecraft);
-        DisplayEntry<?> oldEntry = this.collector.remove(displayEntry.getKey());
+        DisplayEntry<?> oldEntry = Config.combineEntries == CombineEntries.NEVER ? null
+            : this.collector.remove(displayEntry.getKey());
         if (oldEntry != null) {
             displayEntry = displayEntry.mergeWith(oldEntry);
         }
