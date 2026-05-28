@@ -40,10 +40,74 @@ public class DisplayEntryRenderHelper {
             return;
         }
 
+        if (Config.entryBackground == EntryBackground.TOOLTIP) {
+            renderTooltipBackground(posX, posY, width, alpha);
+            return;
+        }
+
         int backgroundAlpha = MathHelper
             .clamp_int((int) ((minecraft.gameSettings.chatOpacity * 0.9F + 0.1F) * alpha * 255.0F), 0, 255);
         int color = backgroundAlpha / 2 << 24;
         Gui.drawRect(posX - 3, posY, posX + width + 5, posY + 17, color);
+    }
+
+    private static void renderTooltipBackground(int posX, int posY, int width, float alpha) {
+        int left = posX - 4;
+        int top = posY - 2;
+        int right = posX + width + 5;
+        int bottom = posY + 18;
+        int backgroundColor = withAlpha(0xF0100010, alpha);
+        int borderStart = withAlpha(0x505000FF, alpha);
+        int borderEnd = withAlpha(0x5028007F, alpha);
+
+        drawGradientRect(left + 1, top, right - 1, top + 1, backgroundColor, backgroundColor);
+        drawGradientRect(left + 1, bottom - 1, right - 1, bottom, backgroundColor, backgroundColor);
+        drawGradientRect(left + 1, top + 1, right - 1, bottom - 1, backgroundColor, backgroundColor);
+        drawGradientRect(left, top + 1, left + 1, bottom - 1, backgroundColor, backgroundColor);
+        drawGradientRect(right - 1, top + 1, right, bottom - 1, backgroundColor, backgroundColor);
+        drawGradientRect(left + 1, top + 1, left + 2, bottom - 1, borderStart, borderEnd);
+        drawGradientRect(right - 2, top + 1, right - 1, bottom - 1, borderStart, borderEnd);
+        drawGradientRect(left + 1, top + 1, right - 1, top + 2, borderStart, borderStart);
+        drawGradientRect(left + 1, bottom - 2, right - 1, bottom - 1, borderEnd, borderEnd);
+    }
+
+    private static int withAlpha(int color, float alpha) {
+        int colorAlpha = color >>> 24;
+        int scaledAlpha = MathHelper.clamp_int((int) (colorAlpha * alpha), 0, 255);
+        return scaledAlpha << 24 | color & 0xFFFFFF;
+    }
+
+    private static void drawGradientRect(int left, int top, int right, int bottom, int startColor, int endColor) {
+        float startAlpha = (float) (startColor >> 24 & 255) / 255.0F;
+        float startRed = (float) (startColor >> 16 & 255) / 255.0F;
+        float startGreen = (float) (startColor >> 8 & 255) / 255.0F;
+        float startBlue = (float) (startColor & 255) / 255.0F;
+        float endAlpha = (float) (endColor >> 24 & 255) / 255.0F;
+        float endRed = (float) (endColor >> 16 & 255) / 255.0F;
+        float endGreen = (float) (endColor >> 8 & 255) / 255.0F;
+        float endBlue = (float) (endColor & 255) / 255.0F;
+
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glDisable(GL11.GL_ALPHA_TEST);
+        OpenGlHelper.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+        GL11.glShadeModel(GL11.GL_SMOOTH);
+
+        Tessellator tessellator = Tessellator.instance;
+        tessellator.startDrawingQuads();
+        tessellator.setColorRGBA_F(startRed, startGreen, startBlue, startAlpha);
+        tessellator.addVertex(right, top, 0.0D);
+        tessellator.addVertex(left, top, 0.0D);
+        tessellator.setColorRGBA_F(endRed, endGreen, endBlue, endAlpha);
+        tessellator.addVertex(left, bottom, 0.0D);
+        tessellator.addVertex(right, bottom, 0.0D);
+        tessellator.draw();
+
+        GL11.glShadeModel(GL11.GL_FLAT);
+        GL11.glDisable(GL11.GL_BLEND);
+        GL11.glEnable(GL11.GL_ALPHA_TEST);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     public static void renderItem(Minecraft minecraft, ItemStack stack, int posX, int posY, float alpha) {
