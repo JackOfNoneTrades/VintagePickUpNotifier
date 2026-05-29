@@ -16,6 +16,14 @@
 [![modrinth](images/badges/modrinth.png)](https://modrinth.com/mod/x)
 [![mcmodcn](images/badges/mcmodcn.png)]()-->
 
+![screenshot1](images/screenshots/s1.png)
+
+## Features
+
+* Feature parity with the original mod, as of version `v26.1.1`
+* Fixed XP value vs orb amount toggle
+* Customizable gap size between notifications
+
 ## Dependencies
 * [UniMixins](https://modrinth.com/mod/unimixins) [![curse](images/icons/curse.png)](https://www.curseforge.com/minecraft/mc-mods/unimixins)  [![modrinth](images/icons/modrinth.png)](https://modrinth.com/mod/unimixins/versions) [![git](images/icons/git.png)](https://github.com/LegacyModdingMC/UniMixins/releases)
 * [FentLib](https://www.curseforge.com/minecraft/mc-mods/fentlib) [![curse](images/icons/curse.png)](https://www.curseforge.com/minecraft/mc-mods/fentlib) [![modrinth](images/icons/modrinth.png)](https://modrinth.com/mod/fentlib) [![67](images/icons/67.png)](https://67.fentanylsolutions.org/mod/fentlib) [![git](images/icons/git.png)](https://github.com/JackOfNoneTrades/FentLib)
