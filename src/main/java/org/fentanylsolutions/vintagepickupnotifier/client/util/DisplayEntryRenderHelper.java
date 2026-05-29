@@ -134,15 +134,20 @@ public class DisplayEntryRenderHelper {
     }
 
     public static void renderItem(Minecraft minecraft, ItemStack stack, int posX, int posY, float alpha) {
-        if (alpha >= 0.99F || !OpenGlHelper.isFramebufferEnabled()) {
-            renderItemDirect(minecraft, stack, posX, posY);
-            return;
-        }
+        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+        try {
+            if (alpha >= 0.99F || !OpenGlHelper.isFramebufferEnabled()) {
+                renderItemDirect(minecraft, stack, posX, posY);
+                return;
+            }
 
-        Framebuffer framebuffer = renderItemToFramebuffer(minecraft, stack);
-        minecraft.getFramebuffer()
-            .bindFramebuffer(true);
-        renderItemFramebuffer(framebuffer, posX - ITEM_FRAMEBUFFER_PADDING, posY - ITEM_FRAMEBUFFER_PADDING, alpha);
+            Framebuffer framebuffer = renderItemToFramebuffer(minecraft, stack);
+            minecraft.getFramebuffer()
+                .bindFramebuffer(true);
+            renderItemFramebuffer(framebuffer, posX - ITEM_FRAMEBUFFER_PADDING, posY - ITEM_FRAMEBUFFER_PADDING, alpha);
+        } finally {
+            GL11.glPopAttrib();
+        }
     }
 
     private static void renderItemDirect(Minecraft minecraft, ItemStack stack, int posX, int posY) {
@@ -156,8 +161,6 @@ public class DisplayEntryRenderHelper {
             .renderItemAndEffectIntoGUI(minecraft.fontRenderer, minecraft.getTextureManager(), stack, posX, posY);
         RenderHelper.disableStandardItemLighting();
         GL11.glDisable(GL12.GL_RESCALE_NORMAL);
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glPopMatrix();
     }
 
@@ -167,7 +170,6 @@ public class DisplayEntryRenderHelper {
         framebuffer.framebufferClear();
         framebuffer.bindFramebuffer(true);
 
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPushMatrix();
         GL11.glLoadIdentity();
@@ -184,13 +186,11 @@ public class DisplayEntryRenderHelper {
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glPopMatrix();
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
-        GL11.glPopAttrib();
 
         return framebuffer;
     }
 
     private static void renderItemFramebuffer(Framebuffer framebuffer, int posX, int posY, float alpha) {
-        GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glDepthMask(false);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -218,9 +218,6 @@ public class DisplayEntryRenderHelper {
         tessellator.draw();
 
         framebuffer.unbindFramebufferTexture();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GL11.glDepthMask(true);
-        GL11.glPopAttrib();
     }
 
     private static Framebuffer getItemFramebuffer(Minecraft minecraft) {

@@ -24,6 +24,7 @@ import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ItemDisplayE
 import org.fentanylsolutions.vintagepickupnotifier.client.util.DisplayEntryRenderHelper;
 import org.fentanylsolutions.vintagepickupnotifier.config.AnchorPoint;
 import org.fentanylsolutions.vintagepickupnotifier.config.CombineEntries;
+import org.lwjgl.opengl.GL11;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.PlayerEvent;
@@ -155,8 +156,8 @@ public class DrawEntriesHandler {
         int elementY = posY;
 
         AngelicaFontBatcher.flush(fontRenderer);
-        org.lwjgl.opengl.GL11.glPushMatrix();
-        org.lwjgl.opengl.GL11.glScalef(scale, scale, 1.0F);
+        GL11.glPushMatrix();
+        GL11.glScalef(scale, scale, 1.0F);
         for (DisplayEntry<?> entry : entries) {
             int elementWidth = entry.getEntryWidth(fontRenderer);
             int elementX = posX + anchorPoint.createPositioner(maxWidth, -1, elementWidth, -1)
@@ -172,7 +173,7 @@ public class DrawEntriesHandler {
             elementY += entryHeight;
         }
         AngelicaFontBatcher.flush(fontRenderer);
-        org.lwjgl.opengl.GL11.glPopMatrix();
+        GL11.glPopMatrix();
     }
 
     @SubscribeEvent
