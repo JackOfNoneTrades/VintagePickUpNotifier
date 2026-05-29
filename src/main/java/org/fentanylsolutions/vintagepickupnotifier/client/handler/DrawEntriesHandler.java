@@ -21,6 +21,7 @@ import org.fentanylsolutions.vintagepickupnotifier.client.compat.AngelicaFontBat
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.DisplayEntry;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ExperienceDisplayEntry;
 import org.fentanylsolutions.vintagepickupnotifier.client.gui.entry.ItemDisplayEntry;
+import org.fentanylsolutions.vintagepickupnotifier.client.util.DisplayEntryRenderHelper;
 import org.fentanylsolutions.vintagepickupnotifier.config.AnchorPoint;
 import org.fentanylsolutions.vintagepickupnotifier.config.CombineEntries;
 
@@ -142,12 +143,15 @@ public class DrawEntriesHandler {
             maxWidth = Math.max(maxWidth, entry.getEntryWidth(fontRenderer));
         }
 
+        int entryMargin = Config.entryMargin;
+        int entryHeight = getEntryHeight(entryMargin);
+        int entryTopOverhang = DisplayEntryRenderHelper.getEntryTopOverhang();
         AnchorPoint.Positioner positioner = anchorPoint
-            .createPositioner(screenWidth, screenHeight, maxWidth, DisplayEntry.ELEMENT_HEIGHT * entries.size());
+            .createPositioner(screenWidth, screenHeight, maxWidth, getTotalHeight(entries.size(), entryMargin));
         int offsetX = (int) (Config.offsetX / scale);
         int offsetY = (int) (Config.offsetY / scale);
         int posX = positioner.getPosX(offsetX);
-        int posY = positioner.getPosY(offsetY - getMoveOffset(entries, partialTicks));
+        int posY = positioner.getPosY(offsetY - getMoveOffset(entries, partialTicks)) + entryTopOverhang;
         int elementY = posY;
 
         AngelicaFontBatcher.flush(fontRenderer);
@@ -165,7 +169,7 @@ public class DrawEntriesHandler {
 
             float alpha = Config.fadeOut ? entry.getRelativeRemainingTicks(partialTicks) : 1.0F;
             entry.render(minecraft, fontRenderer, elementX, elementY, alpha, partialTicks);
-            elementY += DisplayEntry.ELEMENT_HEIGHT;
+            elementY += entryHeight;
         }
         AngelicaFontBatcher.flush(fontRenderer);
         org.lwjgl.opengl.GL11.glPopMatrix();
@@ -185,12 +189,28 @@ public class DrawEntriesHandler {
         if (!Config.moveOut.moveVertically(Config.position)) {
             return 0;
         }
-        return (int) (DisplayEntry.getExpiredRows(entries, partialTicks) * DisplayEntry.ELEMENT_HEIGHT);
+        return (int) (DisplayEntry.getExpiredRows(entries, partialTicks) * getEntryHeight(Config.entryMargin));
     }
 
     private static int getMaxEntryCount(Minecraft minecraft) {
         ScaledResolution resolution = new ScaledResolution(minecraft, minecraft.displayWidth, minecraft.displayHeight);
         int scaledHeight = (int) (resolution.getScaledHeight() / Config.getDisplayScale());
-        return Math.max(1, (int) (scaledHeight * Config.maxHeight / DisplayEntry.ELEMENT_HEIGHT) - 1);
+        int maxHeight = (int) (scaledHeight * Config.maxHeight);
+        return Math.max(1, (maxHeight + Config.entryMargin) / getEntryHeight(Config.entryMargin) - 1);
+    }
+
+    private static int getEntryHeight(int entryMargin) {
+        return getEntryVisualHeight() + entryMargin;
+    }
+
+    private static int getTotalHeight(int entryCount, int entryMargin) {
+        if (entryCount <= 0) {
+            return 0;
+        }
+        return getEntryVisualHeight() * entryCount + entryMargin * (entryCount - 1);
+    }
+
+    private static int getEntryVisualHeight() {
+        return DisplayEntryRenderHelper.getEntryTopOverhang() + DisplayEntryRenderHelper.getEntryBottomOffset();
     }
 }

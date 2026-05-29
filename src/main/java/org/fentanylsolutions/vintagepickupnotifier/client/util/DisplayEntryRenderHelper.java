@@ -24,6 +24,11 @@ import org.lwjgl.opengl.GL12;
 
 public class DisplayEntryRenderHelper {
 
+    private static final int ENTRY_HEIGHT = 18;
+    private static final int CHAT_BACKGROUND_TOP_OVERHANG = 0;
+    private static final int CHAT_BACKGROUND_BOTTOM_OFFSET = 17;
+    private static final int TOOLTIP_BACKGROUND_TOP_OVERHANG = 2;
+    private static final int TOOLTIP_BACKGROUND_BOTTOM_OFFSET = 18;
     private static final int ITEM_FRAMEBUFFER_LOGICAL_SIZE = 32;
     private static final int ITEM_FRAMEBUFFER_PADDING = 8;
     private static final NavigableMap<Integer, String> COUNT_SUFFIXES = new TreeMap<>();
@@ -41,21 +46,39 @@ public class DisplayEntryRenderHelper {
         }
 
         if (Config.entryBackground == EntryBackground.TOOLTIP) {
-            renderTooltipBackground(posX, posY, width, alpha);
+            renderTooltipBackground(
+                posX - 4,
+                posY - getEntryTopOverhang(),
+                posX + width + 5,
+                posY + getEntryBottomOffset(),
+                alpha);
             return;
         }
 
         int backgroundAlpha = MathHelper
             .clamp_int((int) ((minecraft.gameSettings.chatOpacity * 0.9F + 0.1F) * alpha * 255.0F), 0, 255);
         int color = backgroundAlpha / 2 << 24;
-        Gui.drawRect(posX - 3, posY, posX + width + 5, posY + 17, color);
+        Gui.drawRect(posX - 3, posY - getEntryTopOverhang(), posX + width + 5, posY + getEntryBottomOffset(), color);
     }
 
-    private static void renderTooltipBackground(int posX, int posY, int width, float alpha) {
-        int left = posX - 4;
-        int top = posY - 2;
-        int right = posX + width + 5;
-        int bottom = posY + 18;
+    public static int getEntryTopOverhang() {
+        if (Config.entryBackground == EntryBackground.TOOLTIP) {
+            return TOOLTIP_BACKGROUND_TOP_OVERHANG;
+        }
+        return CHAT_BACKGROUND_TOP_OVERHANG;
+    }
+
+    public static int getEntryBottomOffset() {
+        if (Config.entryBackground == EntryBackground.NONE) {
+            return ENTRY_HEIGHT;
+        }
+        if (Config.entryBackground == EntryBackground.TOOLTIP) {
+            return TOOLTIP_BACKGROUND_BOTTOM_OFFSET;
+        }
+        return CHAT_BACKGROUND_BOTTOM_OFFSET;
+    }
+
+    private static void renderTooltipBackground(int left, int top, int right, int bottom, float alpha) {
         int backgroundColor = withAlpha(0xF0100010, alpha);
         int borderStart = withAlpha(0x505000FF, alpha);
         int borderEnd = withAlpha(0x5028007F, alpha);

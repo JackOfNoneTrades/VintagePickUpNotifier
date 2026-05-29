@@ -64,6 +64,7 @@ public class Config {
     public static boolean inventoryCount = false;
     public static boolean displaySingleCount = true;
     public static EntryBackground entryBackground = EntryBackground.CHAT;
+    public static int entryMargin = 2;
     public static boolean displayItemName = true;
 
     public static boolean partialPickUps = true;
@@ -278,6 +279,13 @@ public class Config {
             "entry_background",
             entryBackground,
             "Mode for drawing a background behind entries for better visibility.");
+        entryMargin = getInt(
+            Categories.DISPLAY,
+            "entry_margin",
+            entryMargin,
+            0,
+            32,
+            "Spacing between entries in unscaled pixels.");
         displayItemName = getBoolean(
             Categories.DISPLAY,
             "display_item_name",
